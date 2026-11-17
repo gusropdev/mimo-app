@@ -302,11 +302,12 @@ git push origin main
 1. Acesse [vercel.com/new](https://vercel.com/new) e selecione o seu repositório.
 2. Em **Environment Variables**, adicione as 3 variáveis:
 
-| Nome da Variável | Valor de Exemplo |
-|------------------|------------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://xyzproject.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOi...` |
-| `ALLOWED_EMAILS` | `gustavo@gmail.com,kaylane@gmail.com` |
+| Nome da Variável | Onde encontrar / Exemplo |
+|------------------|--------------------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Copie o **Project URL** do seu Supabase Dashboard (ex: `https://vkdiepnbqdmeprgffbwb.supabase.co`) — *sem barra ou /rest/v1 no final* |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Copie a chave **anon / public** do seu Supabase Dashboard |
+| `ALLOWED_EMAILS` | Seus e-mails permitidos separados por vírgula (ex: `seu@email.com,dela@email.com`) |
+| `SERPER_API_KEY` *(opcional)* | Chave gratuita do [serper.dev](https://serper.dev) (2.500 buscas diretas no Google Images sem bloqueio de IP de servidor) |
 
 3. Clique em **Deploy**.
 

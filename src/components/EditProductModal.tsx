@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Product } from "@/types";
 import { createClient } from "@/lib/supabase/client";
-import { X, Loader2, AlertCircle, Edit3, MessageSquareQuote } from "lucide-react";
+import { X, Loader2, AlertCircle, Edit3, MessageSquareQuote, ExternalLink } from "lucide-react";
 
 interface EditProductModalProps {
   product: Product;
@@ -185,9 +185,22 @@ export function EditProductModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">
-              URL da imagem
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-zinc-700">
+                URL da imagem
+              </label>
+              {title.trim().length >= 2 && (
+                <a
+                  href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 transition-colors"
+                >
+                  <span>Abrir Google Imagens</span>
+                  <ExternalLink className="h-3 w-3 stroke-[2.5]" />
+                </a>
+              )}
+            </div>
             <div className="flex gap-2 items-center">
               <input
                 type="url"

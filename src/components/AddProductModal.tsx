@@ -17,6 +17,7 @@ import {
   Plus,
   MessageSquareQuote,
   Sparkles,
+  ExternalLink,
 } from "lucide-react";
 
 interface AddProductModalProps {
@@ -264,15 +265,15 @@ export function AddProductModal({
                 {isSearchingImage ? (
                   <>
                     <p className="text-xs font-bold text-zinc-900">Buscando foto...</p>
-                    <p className="text-[11px] font-medium text-zinc-400 mt-0.5">Encontrando a foto correspondente.</p>
+                    <p className="text-[11px] font-medium text-zinc-400 mt-0.5">Pesquisando na web em tempo real.</p>
                   </>
                 ) : imageUrl && !imageError ? (
                   <>
                     <p className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                       <Check className="h-4 w-4 stroke-[2.5]" />
-                      Foto pronta!
+                      Foto encontrada!
                     </p>
-                    <p className="text-[11px] font-medium text-zinc-500 mt-0.5">Quer outra? Clique em &ldquo;Buscar outra foto&rdquo;.</p>
+                    <p className="text-[11px] font-medium text-zinc-500 mt-0.5">Quer outra? Clique em &ldquo;Buscar outra foto&rdquo; ou troque abaixo.</p>
                     {hasValidPrice && (
                       <p className="mt-1 text-sm font-bold text-rose-600">{formatCurrencyBRL(currentNumericPrice)}</p>
                     )}
@@ -280,15 +281,45 @@ export function AddProductModal({
                 ) : title.trim().length < 3 ? (
                   <>
                     <p className="text-xs font-semibold text-zinc-700">Digite o nome acima</p>
-                    <p className="text-[11px] font-medium text-zinc-400 mt-0.5">A foto é encontrada em tempo real.</p>
+                    <p className="text-[11px] font-medium text-zinc-400 mt-0.5">Buscamos a foto correspondente automaticamente.</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-xs font-semibold text-zinc-600">Sem foto encontrada</p>
-                    <p className="text-[11px] font-medium text-zinc-400 mt-0.5">Pode salvar sem foto ou colar o link abaixo.</p>
+                    <p className="text-xs font-semibold text-zinc-600">Nenhuma foto direta achada</p>
+                    <p className="text-[11px] font-medium text-zinc-400 mt-0.5">Cole o link abaixo ou salve sem foto.</p>
                   </>
                 )}
               </div>
+            </div>
+
+            {/* Opção para colar link direto ou pesquisar no Google */}
+            <div className="mt-3 pt-3 border-t border-zinc-200/70">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-semibold text-zinc-600">
+                  Link direto da foto <span className="text-zinc-400 font-normal">(opcional)</span>
+                </label>
+                {title.trim().length >= 2 && (
+                  <a
+                    href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(title)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 transition-colors"
+                  >
+                    <span>Abrir Google Imagens</span>
+                    <ExternalLink className="h-3 w-3 stroke-[2.5]" />
+                  </a>
+                )}
+              </div>
+              <input
+                type="url"
+                placeholder="https://... (cole aqui se quiser uma foto específica)"
+                value={imageUrl}
+                onChange={(e) => {
+                  setImageUrl(e.target.value);
+                  setImageError(false);
+                }}
+                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900/10 transition-all"
+              />
             </div>
           </div>
 
