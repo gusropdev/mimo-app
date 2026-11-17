@@ -13,6 +13,8 @@ import {
   ShoppingBag,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   ImageOff,
   Plus,
   MessageSquareQuote,
@@ -38,6 +40,8 @@ export function AddProductModal({
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [candidateImages, setCandidateImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [storeName, setStoreName] = useState("");
   const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
@@ -73,7 +77,7 @@ export function AddProductModal({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title]);
 
-  const handleSearchImage = async (query: string) => {
+  const handleSearchImage = async (query: string, searchOffset: number = 0) => {
     setIsSearchingImage(true);
     setImageError(false);
     try {
@@ -83,13 +87,42 @@ export function AddProductModal({
         body: JSON.stringify({ query }),
       });
       const data = await res.json();
-      setImageUrl(data.imageUrl || "");
+      const imgs: string[] = Array.isArray(data.images) && data.images.length > 0
+        ? data.images
+        : (data.imageUrl ? [data.imageUrl] : []);
+
+      setCandidateImages(imgs);
+      const targetIndex = imgs.length > 0 ? searchOffset % imgs.length : 0;
+      setCurrentImageIndex(targetIndex);
+      setImageUrl(imgs[targetIndex] || "");
       setHasSearched(true);
     } catch {
+      setCandidateImages([]);
+      setCurrentImageIndex(0);
       setImageUrl("");
       setHasSearched(true);
     } finally {
       setIsSearchingImage(false);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (candidateImages.length > 1) {
+      const next = (currentImageIndex + 1) % candidateImages.length;
+      setCurrentImageIndex(next);
+      setImageUrl(candidateImages[next]);
+      setImageError(false);
+    } else {
+      handleSearchImage(title.trim(), currentImageIndex + 1);
+    }
+  };
+
+  const handlePrevImage = () => {
+    if (candidateImages.length > 1) {
+      const prev = (currentImageIndex - 1 + candidateImages.length) % candidateImages.length;
+      setCurrentImageIndex(prev);
+      setImageUrl(candidateImages[prev]);
+      setImageError(false);
     }
   };
 
@@ -210,6 +243,8 @@ export function AddProductModal({
                 setTitle(e.target.value);
                 setHasSearched(false);
                 setImageUrl("");
+                setCandidateImages([]);
+                setCurrentImageIndex(0);
                 setImageError(false);
               }}
               className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
@@ -232,32 +267,63 @@ export function AddProductModal({
               {hasSearched && title.trim().length >= 3 && (
                 <button
                   type="button"
-                  onClick={() => handleSearchImage(title.trim())}
+                  onClick={handleNextImage}
                   disabled={isSearchingImage}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3 w-3 ${isSearchingImage ? "animate-spin" : ""}`} />
-                  Buscar outra foto
+                  <span>
+                    {candidateImages.length > 1
+                      ? `Próxima foto (${currentImageIndex + 1}/${candidateImages.length})`
+                      : "Buscar outra foto"}
+                  </span>
                 </button>
               )}
             </div>
 
             <div className="flex items-center gap-3.5">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white border border-zinc-200 flex items-center justify-center shadow-xs">
-                {isSearchingImage ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-zinc-900" />
-                ) : imageUrl && !imageError ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imageUrl}
-                    alt={title}
-                    className="h-full w-full object-contain p-1"
-                    onError={() => setImageError(true)}
-                  />
-                ) : imageError ? (
-                  <ImageOff className="h-7 w-7 text-zinc-300" />
-                ) : (
-                  <ShoppingBag className="h-7 w-7 text-zinc-300" />
+              <div className="flex flex-col items-center shrink-0">
+                <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-white border border-zinc-200 flex items-center justify-center shadow-xs">
+                  {isSearchingImage ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-zinc-900" />
+                  ) : imageUrl && !imageError ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imageUrl}
+                      alt={title}
+                      className="h-full w-full object-contain p-1"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : imageError ? (
+                    <ImageOff className="h-7 w-7 text-zinc-300" />
+                  ) : (
+                    <ShoppingBag className="h-7 w-7 text-zinc-300" />
+                  )}
+                </div>
+
+                {/* Navegação entre as fotos encontradas */}
+                {candidateImages.length > 1 && !isSearchingImage && (
+                  <div className="flex items-center justify-center gap-1.5 mt-2">
+                    <button
+                      type="button"
+                      onClick={handlePrevImage}
+                      className="rounded-lg bg-zinc-200/80 hover:bg-zinc-200 p-1 text-zinc-700 transition-colors active:scale-95"
+                      title="Foto anterior"
+                    >
+                      <ChevronLeft className="h-3 w-3" />
+                    </button>
+                    <span className="text-[10px] font-bold text-zinc-600 min-w-[32px] text-center">
+                      {currentImageIndex + 1}/{candidateImages.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleNextImage}
+                      className="rounded-lg bg-zinc-200/80 hover:bg-zinc-200 p-1 text-zinc-700 transition-colors active:scale-95"
+                      title="Próxima foto"
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -273,7 +339,11 @@ export function AddProductModal({
                       <Check className="h-4 w-4 stroke-[2.5]" />
                       Foto encontrada!
                     </p>
-                    <p className="text-[11px] font-medium text-zinc-500 mt-0.5">Quer outra? Clique em &ldquo;Buscar outra foto&rdquo; ou troque abaixo.</p>
+                    <p className="text-[11px] font-medium text-zinc-500 mt-0.5">
+                      {candidateImages.length > 1
+                        ? `Temos ${candidateImages.length} opções de fotos. Use as setinhas ou clique em próxima.`
+                        : "Quer outra? Clique em buscar outra foto ou cole abaixo."}
+                    </p>
                     {hasValidPrice && (
                       <p className="mt-1 text-sm font-bold text-rose-600">{formatCurrencyBRL(currentNumericPrice)}</p>
                     )}
